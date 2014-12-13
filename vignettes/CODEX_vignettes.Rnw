@@ -1,0 +1,133 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{amscd}
+\usepackage[tableposition=top]{caption}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+%\VignetteIndexEntry{Using CODEX}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\title{CODEX vignette}
+\author{Yuchao Jiang
+    \\
+    yuchaoj@wharton.upenn.edu}
+\maketitle
+This is a demo for using the \verb@CODEX@ package in R. \verb@CODEX@ is a 
+normalization and copy number variation calling procedure for whole exome DNA 
+sequencing data. \verb@CODEX@ relies on the availability of multiple samples 
+processed using the same sequencing pipeline for normalization, and does not 
+require matched controls. The normalization model in \verb@CODEX@ includes 
+terms that specifically remove biases due to GC content, exon capture and 
+amplification efficiency, and latent systemic artifacts. \verb@CODEX@ also 
+includes a Poisson likelihood-based recursive segmentation procedure that 
+explicitly models the count-based exome sequencing data.
+Below is an example on calling copy number variation using whole-exome 
+sequencing data of 46 HapMap samples sequenced at the Washington University 
+Genome Sequencing Center. Only the 401-500 exons from chromosome 22 are 
+analysed for illustration purposes.
+
+\section*{1. CODEX workflow:}
+
+\subsection*{1.1 Get directories of .bam files, read in exon target positions 
+from .bed files, and get sample names.}
+<<bambedObj>>=
+library(CODEX)
+library(WES.1KG.WUGSC)  # Demo data from the 1000 Genomes Project.
+dirPath <- system.file("extdata", package = "WES.1KG.WUGSC")
+chr <- 22
+bambedObj <- getbambed(bampath = dirPath, bedFile = file.path(dirPath, 
+    "chr22_400_to_500.bed"), sampnameFile = file.path(dirPath, "sampname"),
+    projectname = "CODEX_demo", chr)
+bamdir <- bambedObj$bamdir
+sampname <- bambedObj$sampname
+ref <- bambedObj$ref
+projectname <- bambedObj$projectname
+chr <- bambedObj$chr
+@
+
+\subsection*{1.2 Get raw read depth from the .bam files. Read lengths across all 
+samples are also returned.} 
+<<coverageObj>>=
+coverageObj <- getcoverage(bambedObj, mapqthres = 20)
+Y <- coverageObj$Y
+readlength <- coverageObj$readlength
+@
+
+\subsection*{1.3 Compute GC content and mappability for each exon target.}
+<<gcmapp>>=
+gc <- getgc(chr, ref)
+mapp <- getmapp(chr, ref)
+@
+
+\subsection*{1.4 Take a sample-wise and exon-wise quality control procedure on 
+the depth of coverage matrix.}
+<<qcObj>>=
+qcObj <- qc(Y, sampname, chr, ref, mapp, gc, cov_thresh = c(20, 4000), 
+    length_thresh = c(20, 2000), mapp_thresh = 0.9, gc_thresh = c(20, 80))
+Y_qc <- qcObj$Y_qc
+sampname_qc <- qcObj$sampname_qc
+gc_qc <- qcObj$gc_qc
+mapp_qc <- qcObj$mapp_qc
+ref_qc <- qcObj$ref_qc
+qcmat <- qcObj$qcmat
+@
+
+\subsection*{1.5 Fit Poisson latent factor model for normalization of the read 
+depth data.}
+<<normObj>>=
+normObj <- normalize(Y_qc, gc_qc, Kmax = 9)
+Yhat <- normObj$Yhat
+AIC <- normObj$AIC
+BIC <- normObj$BIC
+RSS <- normObj$RSS
+@
+
+\subsection*{1.6 Determine the number of latent factors. AIC, BIC, and deviance 
+reduction plots are generated in a .pdf file.}
+CODEX reports all three statistical metrics (AIC, BIC, percent of Variance 
+explained) and uses BIC as the default method to determine the number of 
+Poisson factors. Since false positives can be screened out through a closer 
+examination of the post-segmentation data, whereas CNV signals removed in the 
+normalization step cannot be recovered, CODEX opts for a more conservative 
+normalization that, when in doubt, uses a smaller value of K.    
+<<choiceofK, eval=FALSE>>=
+choiceofK(AIC, BIC, RSS, filename = paste(projectname, "_", chr, "_choiceofK", 
+    ".pdf", sep = ""))
+@
+\begin{figure}[H]
+\begin{center}
+<<label=fig1,fig=TRUE,echo=FALSE,height=10>>=
+filename <- paste(projectname, "_", chr, "_choiceofK", ".pdf", sep = "")
+Kmax <- length(AIC)
+par(mfrow = c(3, 1))
+plot(1:Kmax, AIC, type = "b", xlab = "Number of latent variables")
+plot(1:Kmax, BIC, type = "b", xlab = "Number of latent variables")
+plot(1:Kmax, RSS, type = "b", xlab = "Number of latent variables")
+@
+\end{center}
+\caption{Determination of K via AIC, BIC, and deviance reduction. Optimal K is 
+set at 2.}
+\label{fig:one}
+\end{figure}
+
+\subsection*{1.7 Fit the Poisson log-likelihood ratio based segmentation 
+procedure to determine CNV regions across all samples.}
+For germline CNV detection, \verb@CODEX@ uses the "integer" mode; for CNV 
+detection involving large recurrent chromosomal aberrations in mixture 
+populations (e.g. somatic CNV detection in cancer),  \verb@CODEX@ opts to use
+the "fraction" mode.
+<<segment>>=
+finalcall <- segment(Y_qc, Yhat, optK = which.max(BIC), sampname_qc, ref_qc, 
+    chr, lmax = 200, mode = "integer")
+finalcall
+@
+
+
+\section*{2. Session information:}
+Output of sessionInfo on the system on which this document was compiled:
+<<sessionInfo, results=tex, echo=FALSE>>=
+toLatex(sessionInfo())
+@
+
+\end{document}
