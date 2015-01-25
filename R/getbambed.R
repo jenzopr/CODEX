@@ -1,16 +1,12 @@
-getbambed <- function(bampath, bedFile, sampnameFile, projectname, chr) {
-    if ((!file.exists(bedFile)) | (!file.exists(sampnameFile)))
-        stop("Please check the file directories provided. Files could not be 
+getbambed <- function(bamdir, bedFile, sampname, projectname, chr) {
+    if (!file.exists(bedFile))
+        stop("Please check the bed file directory provided. File could not be 
             found!")
-    bamFile <- list.files(bampath, pattern = "*.bam$")
-    bamdir <- file.path(bampath, bamFile)
-    sampname <- as.matrix(read.table(sampnameFile))
-    exomtarg <- rtracklayer::import(bedFile, format = "bed")
-    ref <- ranges(exomtarg)
-    start(ref) <- start(ref) - 1
-    if (seqlevels(exomtarg) != chr) 
-        message(paste("You have provided chr = ", chr, ". Bed file has chr = ", 
-                      seqlevels(exomtarg), "!", sep = ""))
+    exomtarg <- read.table(bedFile, sep = '\t')
+    exomtarg <- exomtarg[exomtarg[,1] == chr,]
+    ref <- IRanges(start = exomtarg[,2], end = exomtarg[,3])
+    if (length(ref) == 0) 
+        message('No exonic targets loaded from the bed file. Check chr style.')
     list(bamdir = bamdir, sampname = sampname, ref = ref, projectname = 
              projectname, chr = chr)
 }

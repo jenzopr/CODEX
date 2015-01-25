@@ -21,7 +21,7 @@ getcoverage <- function(bambedObj, mapqthres) {
         message("Getting coverage for sample ", sampname[i, 1], ": ", 
                 "read length ", readlength[i], ".", sep = "")
         irang <- IRanges(bam[["pos"]][mapqfilter], width = 
-                             bam[["qwidth"]][mapqfilter])
+                        bam[["qwidth"]][mapqfilter])
         Y[, i] <- countOverlaps(ref, irang)
     }
     list(Y = Y, readlength = readlength)

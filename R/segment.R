@@ -1,10 +1,10 @@
-segment <- function(Y_qc, Yhat, optK, sampname_qc, ref_qc, chr, lmax, mode) {
+segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, chr, lmax, mode) {
     finalcall <- matrix(ncol = 9)
     lmax <- lmax - 1
     for (sampno in 1:ncol(Y_qc)) {
         message("Segmenting sample ", sampno, ": ", sampname_qc[sampno], ".")
         y <- Y_qc[, sampno]
-        yhat <- Yhat[[optK]][, sampno]
+        yhat <- Yhat[[which(K == optK)]][, sampno]
         num <- length(y)
         y <- c(y, rep(0, lmax))
         yhat <- c(yhat, rep(0, lmax))

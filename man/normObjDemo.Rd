@@ -22,5 +22,6 @@ Yhat <- normObjDemo$Yhat
 AIC <- normObjDemo$AIC
 BIC <- normObjDemo$BIC
 RSS <- normObjDemo$RSS
+K <- normObjDemo$K
 }
 \keyword{datasets}

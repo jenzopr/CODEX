@@ -8,7 +8,7 @@ Recursive segmentation algorithm for CNV detection and genotyping, using
 normalized read depth from whole exome sequencing.
 }
 \usage{
-segment(Y_qc, Yhat, optK, sampname_qc, ref_qc,chr,lmax,mode)
+segment(Y_qc, Yhat, optK, K, sampname_qc, ref_qc,chr,lmax,mode)
 }
 \arguments{
     \item{Y_qc}{
@@ -18,6 +18,10 @@ segment(Y_qc, Yhat, optK, sampname_qc, ref_qc,chr,lmax,mode)
     \code{\link{normalize}}}
     \item{optK}{
     Optimal value \code{K} returned from \code{\link{choiceofK}}}
+    \item{K}{
+    Number of latent Poisson factors. Can be an integer if optimal solution has
+    been chosen or a vector of integers so that AIC, BIC, and RSS are computed
+    for choice of optimal k.}
     \item{sampname_qc}{
     Vector of sample names after quality control procedure returned from 
     \code{\link{qc}}}
@@ -46,11 +50,12 @@ Yuchao Jiang \email{yuchaoj@wharton.upenn.edu}
 Y_qc <- qcObjDemo$Y_qc
 Yhat <- normObjDemo$Yhat
 BIC <- normObjDemo$BIC
+K <- normObjDemo$K
 sampname_qc <- qcObjDemo$sampname_qc
 ref_qc <- qcObjDemo$ref_qc
 chr <- bambedObjDemo$chr
-finalcall <- segment(Y_qc, Yhat, optK = which.max(BIC), sampname_qc, ref_qc, 
-    chr, lmax = 200, mode = "integer")
+finalcall <- segment(Y_qc, Yhat, optK = K[which.max(BIC)], K = K, sampname_qc,
+    ref_qc, chr, lmax = 200, mode = "integer")
 finalcall
 }
 \keyword{ package }

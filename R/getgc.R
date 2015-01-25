@@ -4,7 +4,7 @@ getgc <- function(chr, ref) {
     } else if (chr == "Y" | chr == "y" | chr == "chrY" | chr == "chry") {
         chrtemp <- 24
     } else {
-        chrtemp <- as.numeric(mapSeqlevels(as.character(chr), "NCBI"))
+        chrtemp <- as.numeric(mapSeqlevels(as.character(chr), "NCBI")[1])
     }
     if (length(chrtemp) == 0) 
         message("Chromosome cannot be found in NCBI Homo sapiens database!")

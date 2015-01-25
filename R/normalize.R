@@ -1,12 +1,13 @@
-normalize <- function(Y_qc, gc_qc, Kmax) {
+normalize <- function(Y_qc, gc_qc, K) {
     N <- colSums(Y_qc)
     Nmat <- matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), data = N, byrow = TRUE)
-    Yhat <- list(length = Kmax)
-    AIC <- rep(NA, length = Kmax)
-    BIC <- rep(NA, length = Kmax)
-    RSS <- rep(NA, length = Kmax)
-    for (K in 1:Kmax) {
-        message("K = ", K)
+    Yhat <- list(length = length(K))
+    AIC <- rep(NA, length = length(K))
+    BIC <- rep(NA, length = length(K))
+    RSS <- rep(NA, length = length(K))
+    for (ki in 1:length(K)) {
+        k <- K[ki]
+        message("k = ", k)
         maxiter <- 10
         maxhiter <- 50
         MINBETA <- 1e-04
@@ -19,8 +20,8 @@ normalize <- function(Y_qc, gc_qc, Kmax) {
         betahat <- rep(1, nrow(Y_qc))
         betahatmat <- matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), 
                              data = betahat, byrow = FALSE)
-        ghat <- matrix(0, nrow = nrow(Y_qc), ncol = K)
-        hhat <- matrix(0, nrow = ncol(Y_qc), ncol = K)
+        ghat <- matrix(0, nrow = nrow(Y_qc), ncol = k)
+        hhat <- matrix(0, nrow = ncol(Y_qc), ncol = k)
         bhdiff <- rep(Inf, maxiter)
         fhdiff <- rep(Inf, maxiter)
         betahatlist <- list(length = maxiter)
@@ -49,7 +50,7 @@ normalize <- function(Y_qc, gc_qc, Kmax) {
             logmat <- log(pmax(Y_qc, 1)) - L
             logmat <- logmat - matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), 
                             data = apply(logmat, 1, mean), byrow = FALSE)
-            hhat <- svd(logmat, nu = K, nv = K)$v
+            hhat <- svd(logmat, nu = k, nv = k)$v
             hhatnew <- hhat
             hiter <- 1
             hhdiff <- rep(Inf, maxhiter)
@@ -65,7 +66,7 @@ normalize <- function(Y_qc, gc_qc, Kmax) {
                 gh <- ghat %*% t(hhatnew)
                 gh <- gh - matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), 
                                   data = apply(gh, 1, mean), byrow = FALSE)
-                hhatnew <- svd(gh, nu = K, nv = K)$v
+                hhatnew <- svd(gh, nu = k, nv = k)$v
                 hhdiff[hiter] <- sum((hhatnew - hhat)^2)/length(hhat)
                 hhat <- hhatnew
                 if (hhdiff[hiter] < HHTHRESH) 
@@ -92,15 +93,15 @@ normalize <- function(Y_qc, gc_qc, Kmax) {
         hhat <- hhatlist[[optIter]]
         betahatmat <- matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), 
                              data = betahat, byrow = FALSE)
-        Yhat[[K]] <- fhat * Nmat * betahatmat * exp(ghat %*% t(hhat))
-        AIC[K] <- 2 * sum(Y_qc * log(Yhat[[K]]) - Yhat[[K]]) - 
+        Yhat[[ki]] <- fhat * Nmat * betahatmat * exp(ghat %*% t(hhat))
+        AIC[ki] <- 2 * sum(Y_qc * log(Yhat[[ki]]) - Yhat[[ki]]) - 
             2 * (length(ghat) + length(hhat))
-        BIC[K] <- 2 * sum(Y_qc * log(Yhat[[K]]) - Yhat[[K]]) - (length(ghat) + 
-            length(hhat)) * log(length(Y_qc))
-        RSS[K] <- sum((Y_qc - Yhat[[K]])^2/length(Y_qc))
-        message("AIC", K, " = ", round(AIC[K], 3))
-        message("BIC", K, " = ", round(BIC[K], 3))
-        message("RSS", K, " = ", round(RSS[K], 3), "\n")
+        BIC[ki] <- 2 * sum(Y_qc * log(Yhat[[ki]]) - Yhat[[ki]]) - (length(ghat)
+            + length(hhat)) * log(length(Y_qc))
+        RSS[ki] <- sum((Y_qc - Yhat[[ki]])^2/length(Y_qc))
+        message("AIC", k, " = ", round(AIC[ki], 3))
+        message("BIC", k, " = ", round(BIC[ki], 3))
+        message("RSS", k, " = ", round(RSS[ki], 3), "\n")
     }
-    list(Yhat = Yhat, AIC = AIC, BIC = BIC, RSS = RSS)
+    list(Yhat = Yhat, AIC = AIC, BIC = BIC, RSS = RSS, K = K)
 }

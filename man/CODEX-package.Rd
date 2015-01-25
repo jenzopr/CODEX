@@ -21,7 +21,7 @@ the count-based exome sequencing data.
 Package: \tab CODEX\cr
 Type: \tab Package\cr
 Version: \tab 0.99.0\cr
-Date: \tab 2014-03-03\cr
+Date: \tab 2015-01-13\cr
 License: \tab GPL-2\cr
 }
 CODEX takes as input the bam files/directories for whole exome sequencing 

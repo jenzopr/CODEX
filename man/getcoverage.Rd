@@ -31,9 +31,13 @@ Yuchao Jiang \email{yuchaoj@wharton.upenn.edu}
 \examples{
 library(WES.1KG.WUGSC)
 dirPath <- system.file("extdata", package = "WES.1KG.WUGSC")
+bamFile <- list.files(dirPath, pattern = '*.bam$')
+bamdir <- file.path(dirPath, bamFile)
+sampnameFile <- file.path(dirPath, "sampname")
+sampname <- as.matrix(read.table(sampnameFile))
 chr <- 22
-bambedObj <- getbambed(bampath = dirPath, bedFile = file.path(dirPath, 
-    "chr22_400_to_500.bed"), sampnameFile = file.path(dirPath, "sampname"),
+bambedObj <- getbambed(bamdir = bamdir, bedFile = file.path(dirPath, 
+    "chr22_400_to_500.bed"), sampname = sampname,
     projectname = "CODEX_demo", chr)
 bamdir <- bambedObj$bamdir
 sampname <- bambedObj$sampname

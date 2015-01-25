@@ -33,11 +33,16 @@ analysed for illustration purposes.
 from .bed files, and get sample names.}
 <<bambedObj>>=
 library(CODEX)
-library(WES.1KG.WUGSC)  # Demo data from the 1000 Genomes Project.
+library(WES.1KG.WUGSC)
+# Toy data from the 1000 Genomes Project.
 dirPath <- system.file("extdata", package = "WES.1KG.WUGSC")
+bamFile <- list.files(dirPath, pattern = '*.bam$')
+bamdir <- file.path(dirPath, bamFile)
+sampnameFile <- file.path(dirPath, "sampname")
+sampname <- as.matrix(read.table(sampnameFile))
 chr <- 22
-bambedObj <- getbambed(bampath = dirPath, bedFile = file.path(dirPath, 
-    "chr22_400_to_500.bed"), sampnameFile = file.path(dirPath, "sampname"),
+bambedObj <- getbambed(bamdir = bamdir, bedFile = file.path(dirPath, 
+    "chr22_400_to_500.bed"), sampname = sampname,
     projectname = "CODEX_demo", chr)
 bamdir <- bambedObj$bamdir
 sampname <- bambedObj$sampname
@@ -76,11 +81,12 @@ qcmat <- qcObj$qcmat
 \subsection*{1.5 Fit Poisson latent factor model for normalization of the read 
 depth data.}
 <<normObj>>=
-normObj <- normalize(Y_qc, gc_qc, Kmax = 9)
+normObj <- normalize(Y_qc, gc_qc, K = 1:9)
 Yhat <- normObj$Yhat
 AIC <- normObj$AIC
 BIC <- normObj$BIC
 RSS <- normObj$RSS
+K <- normObj$K
 @
 
 \subsection*{1.6 Determine the number of latent factors. AIC, BIC, and deviance 
@@ -92,8 +98,8 @@ examination of the post-segmentation data, whereas CNV signals removed in the
 normalization step cannot be recovered, CODEX opts for a more conservative 
 normalization that, when in doubt, uses a smaller value of K.    
 <<choiceofK, eval=FALSE>>=
-choiceofK(AIC, BIC, RSS, filename = paste(projectname, "_", chr, "_choiceofK", 
-    ".pdf", sep = ""))
+choiceofK(AIC, BIC, RSS, K, filename = paste(projectname, "_", chr, 
+    "_choiceofK", ".pdf", sep = ""))
 @
 \begin{figure}[H]
 \begin{center}
@@ -101,9 +107,9 @@ choiceofK(AIC, BIC, RSS, filename = paste(projectname, "_", chr, "_choiceofK",
 filename <- paste(projectname, "_", chr, "_choiceofK", ".pdf", sep = "")
 Kmax <- length(AIC)
 par(mfrow = c(3, 1))
-plot(1:Kmax, AIC, type = "b", xlab = "Number of latent variables")
-plot(1:Kmax, BIC, type = "b", xlab = "Number of latent variables")
-plot(1:Kmax, RSS, type = "b", xlab = "Number of latent variables")
+plot(K, AIC, type = "b", xlab = "Number of latent variables")
+plot(K, BIC, type = "b", xlab = "Number of latent variables")
+plot(K, RSS, type = "b", xlab = "Number of latent variables")
 @
 \end{center}
 \caption{Determination of K via AIC, BIC, and deviance reduction. Optimal K is 
@@ -118,8 +124,8 @@ detection involving large recurrent chromosomal aberrations in mixture
 populations (e.g. somatic CNV detection in cancer),  \verb@CODEX@ opts to use
 the "fraction" mode.
 <<segment>>=
-finalcall <- segment(Y_qc, Yhat, optK = which.max(BIC), sampname_qc, ref_qc, 
-    chr, lmax = 200, mode = "integer")
+finalcall <- segment(Y_qc, Yhat, optK = K[which.max(BIC)], K = K, sampname_qc,
+    ref_qc, chr, lmax = 200, mode = "integer")
 finalcall
 @
 

@@ -8,12 +8,13 @@ Determines the number of latent variables K via AIC, BIC, and deviance
 reduction. A pdf file containing all three plots is generated.
 }
 \usage{
-choiceofK(AIC, BIC, RSS, filename)
+choiceofK(AIC, BIC, RSS, K, filename)
 }
 \arguments{
     \item{AIC}{ vector of AIC for each K returned from \code{\link{normalize}}}
     \item{BIC}{ vector of BIC for each K returned from \code{\link{normalize}}}
     \item{RSS}{ vector of RSS for each K returned from \code{\link{normalize}}}
+    \item{K}{ vector of K returned from \code{\link{normalize}}}
     \item{filename}{ Filename of the output plot of AIC and RSS}
 }
 \value{
@@ -36,8 +37,9 @@ Yuchao Jiang \email{yuchaoj@wharton.upenn.edu}
 AIC <- normObjDemo$AIC
 BIC <- normObjDemo$BIC
 RSS <- normObjDemo$RSS
+K <- normObjDemo$K
 projectname <- bambedObjDemo$projectname
 chr <- bambedObjDemo$chr
-choiceofK(AIC, BIC, RSS, filename = paste(projectname, "_", chr, "_choiceofK", 
-    ".pdf", sep = ""))}
+choiceofK(AIC, BIC, RSS, K, filename = paste(projectname, "_", chr, 
+    "_choiceofK", ".pdf", sep = ""))}
 \keyword{ package }
