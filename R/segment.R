@@ -5,6 +5,8 @@ segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, chr, lmax, mode) {
         message("Segmenting sample ", sampno, ": ", sampname_qc[sampno], ".")
         y <- Y_qc[, sampno]
         yhat <- Yhat[[which(K == optK)]][, sampno]
+        y[yhat<=20]=20
+        yhat[yhat<=20]=20
         num <- length(y)
         y <- c(y, rep(0, lmax))
         yhat <- c(yhat, rep(0, lmax))

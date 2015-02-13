@@ -93,7 +93,7 @@ normalize <- function(Y_qc, gc_qc, K) {
         hhat <- hhatlist[[optIter]]
         betahatmat <- matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), 
                              data = betahat, byrow = FALSE)
-        Yhat[[ki]] <- fhat * Nmat * betahatmat * exp(ghat %*% t(hhat))
+        Yhat[[ki]] <- round(fhat * Nmat * betahatmat * exp(ghat %*% t(hhat)),0)
         AIC[ki] <- 2 * sum(Y_qc * log(Yhat[[ki]]) - Yhat[[ki]]) - 
             2 * (length(ghat) + length(hhat))
         BIC[ki] <- 2 * sum(Y_qc * log(Yhat[[ki]]) - Yhat[[ki]]) - (length(ghat)
