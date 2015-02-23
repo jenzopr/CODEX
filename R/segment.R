@@ -1,12 +1,10 @@
-segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, chr, lmax, mode) {
+segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, ref, chr, lmax, mode) {
     finalcall <- matrix(ncol = 9)
     lmax <- lmax - 1
     for (sampno in 1:ncol(Y_qc)) {
         message("Segmenting sample ", sampno, ": ", sampname_qc[sampno], ".")
         y <- Y_qc[, sampno]
         yhat <- Yhat[[which(K == optK)]][, sampno]
-        y[yhat<=20]=20
-        yhat[yhat<=20]=20
         num <- length(y)
         y <- c(y, rep(0, lmax))
         yhat <- c(yhat, rep(0, lmax))
@@ -24,6 +22,8 @@ segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, chr, lmax, mode) {
         yact <- yact[j <= num]
         lambda <- lambda[j <= num]
         j <- j[j <= num]
+        yact[lambda<20]=20
+        lambda[lambda<20]=20
         if (mode == "integer") {
             chat <- round(2 * (yact/lambda))
         } else if (mode == "fraction") {
@@ -91,6 +91,10 @@ segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, chr, lmax, mode) {
     } else {
         finalcall <- cbind(finalcall[, 1:2], cnvtype, st, ed, (ed - st + 
             1)/1000, finalcall[, 3:9])
+    }
+    for(k in 1:nrow(finalcall)){
+      finalcall[k,7]=which(start(ref)==finalcall[k,4])
+      finalcall[k,8]=which(end(ref)==finalcall[k,5])
     }
     colnames(finalcall) <- c("sample_name", "chr", "cnv", "st_bp", "ed_bp", 
         "length_kb", "st_exon", "ed_exon", "raw_cov", 

@@ -8,7 +8,7 @@ Recursive segmentation algorithm for CNV detection and genotyping, using
 normalized read depth from whole exome sequencing.
 }
 \usage{
-segment(Y_qc, Yhat, optK, K, sampname_qc, ref_qc,chr,lmax,mode)
+segment(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, ref, chr, lmax, mode)
 }
 \arguments{
     \item{Y_qc}{
@@ -28,6 +28,9 @@ segment(Y_qc, Yhat, optK, K, sampname_qc, ref_qc,chr,lmax,mode)
     \item{ref_qc}{
     IRanges object of genomic positions of each exon after quality control 
     procedure returned from \code{\link{qc}}}
+    \item{ref}{
+    IRanges object of genomic positions of each exon before quality control 
+    procedure}
     \item{chr}{
     Chromosome number returned from \code{\link{getbambed}}}
     \item{lmax}{
@@ -53,9 +56,10 @@ BIC <- normObjDemo$BIC
 K <- normObjDemo$K
 sampname_qc <- qcObjDemo$sampname_qc
 ref_qc <- qcObjDemo$ref_qc
+ref <- bambedObjDemo$ref
 chr <- bambedObjDemo$chr
 finalcall <- segment(Y_qc, Yhat, optK = K[which.max(BIC)], K = K, sampname_qc,
-    ref_qc, chr, lmax = 200, mode = "integer")
+    ref_qc, ref, chr, lmax = 200, mode = "integer")
 finalcall
 }
 \keyword{ package }
