@@ -56,7 +56,6 @@ bambedObj <- getbambed(bamdir = bamdir, bedFile = bedFile,
                        sampname = sampname, projectname = "CODEX_demo", chr)
 bamdir <- bambedObj$bamdir; sampname <- bambedObj$sampname
 ref <- bambedObj$ref; projectname <- bambedObj$projectname; chr <- bambedObj$chr
-<<bambedObj2, eval=FALSE>>=
 save(bambedObj, file = paste(projectname, '_', chr, '_bambedObj', '.rda', sep=''),
      compress='xz')
 @
@@ -66,7 +65,6 @@ samples are also returned.}
 <<coverageObj1>>=
 coverageObj <- getcoverage(bambedObj, mapqthres = 20)
 Y <- coverageObj$Y; readlength <- coverageObj$readlength
-<<coverageObj2, eval=FALSE>>=
 save(coverageObj, file = paste(projectname, '_', chr, '_coverageObj', '.rda', sep=''),
      compress='xz')
 @
@@ -75,7 +73,6 @@ save(coverageObj, file = paste(projectname, '_', chr, '_coverageObj', '.rda', se
 <<gcmapp1>>=
 gc <- getgc(chr, ref)
 mapp <- getmapp(chr, ref)
-<<gcmapp2, eval=FALSE>>=
 save(gc, file = paste(projectname, '_', chr, '_gc', '.rda', sep=''),
      compress='xz')
 save(mapp, file = paste(projectname, '_', chr, '_mapp', '.rda', sep=''),
@@ -89,9 +86,8 @@ qcObj <- qc(Y, sampname, chr, ref, mapp, gc, cov_thresh = c(20, 4000),
     length_thresh = c(20, 2000), mapp_thresh = 0.9, gc_thresh = c(20, 80))
 Y_qc <- qcObj$Y_qc; sampname_qc <- qcObj$sampname_qc; gc_qc <- qcObj$gc_qc
 mapp_qc <- qcObj$mapp_qc; ref_qc <- qcObj$ref_qc; qcmat <- qcObj$qcmat
-<<qcObj2, eval=FALSE>>=
 write.table(qcmat, file = paste(projectname, '_', chr, '_qcmat', '.txt', sep=''),
-            sep='\t', quote=F, row.names=F)
+            sep='\t', quote=FALSE, row.names=FALSE)
 save(qcObj, file = paste(projectname, '_', chr, '_qcObj', '.rda', sep=''),
      compress='xz')
 @
@@ -102,7 +98,6 @@ depth data.}
 normObj <- normalize(Y_qc, gc_qc, K = 1:9)
 Yhat <- normObj$Yhat; AIC <- normObj$AIC; BIC <- normObj$BIC
 RSS <- normObj$RSS; K <- normObj$K
-<<normObj2, eval=FALSE>>=
 save(normObj, file = paste(projectname, '_', chr, '_normObj', '.rda', sep='')
      ,compress='xz')
 @
@@ -111,7 +106,7 @@ Poisson latent factor using only the read depths in the control cohort,
 and then computes the sample-wise latent factor terms for the case samples by
 regression. \verb@normal_index@ specifies the indices of normal samples and the 
 normalization function to use under this setting is \verb$normalize2$.
-<<normObj3, eval=FALSE>>=
+<<normObj2, eval=FALSE>>=
 normObj <- normalize2(Y_qc, gc_qc, K = 1:9, normal_index=seq(1,45,2))
 Yhat <- normObj$Yhat; AIC <- normObj$AIC; BIC <- normObj$BIC
 RSS <- normObj$RSS; K <- normObj$K
@@ -173,9 +168,8 @@ optK = K[which.max(BIC)]
 finalcall <- segment(Y_qc, Yhat, optK = optK, K = K, sampname_qc,
     ref_qc, ref, chr, lmax = 200, mode = "integer")
 finalcall
-<<segment2, eval=FALSE>>=
 write.table(finalcall, file = paste(projectname, '_', chr, '_', optK, '_CODEX_frac.txt',
-            sep=''), sep='\t', quote=F, row.names=F)
+            sep=''), sep='\t', quote=FALSE, row.names=FALSE)
 @
 
 

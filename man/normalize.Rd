@@ -41,7 +41,7 @@ Yuchao Jiang \email{yuchaoj@wharton.upenn.edu}
 \examples{
 Y_qc <- qcObjDemo$Y_qc
 gc_qc <- qcObjDemo$gc_qc
-normObj <- normalize(Y_qc, gc_qc, K = 1:9)
+normObj <- normalize(Y_qc, gc_qc, K = 1:5)
 Yhat <- normObj$Yhat
 AIC <- normObj$AIC
 BIC <- normObj$BIC
