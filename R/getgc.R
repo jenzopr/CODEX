@@ -11,6 +11,6 @@ getgc <- function(chr, ref) {
     chrm <- unmasked(Hsapiens[[chrtemp]])
     seqs <- Views(chrm, ref)
     af <- alphabetFrequency(seqs, baseOnly = TRUE, as.prob = TRUE)
-    gc <- (af[, "G"] + af[, "C"]) * 100
+    gc <- round((af[, "G"] + af[, "C"]) * 100,2)
     gc
 }

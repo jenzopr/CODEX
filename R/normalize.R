@@ -94,9 +94,9 @@ normalize <- function(Y_qc, gc_qc, K) {
         betahatmat <- matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), 
                              data = betahat, byrow = FALSE)
         Yhat[[ki]] <- round(fhat * Nmat * betahatmat * exp(ghat %*% t(hhat)),0)
-        AIC[ki] <- 2 * sum(Y_qc * log(Yhat[[ki]]) - Yhat[[ki]]) - 
+        AIC[ki] <- 2 * sum(Y_qc * log(pmax(Yhat[[ki]],1)) - Yhat[[ki]]) - 
             2 * (length(ghat) + length(hhat))
-        BIC[ki] <- 2 * sum(Y_qc * log(Yhat[[ki]]) - Yhat[[ki]]) - (length(ghat)
+        BIC[ki] <- 2 * sum(Y_qc * log(pmax(Yhat[[ki]],1)) - Yhat[[ki]]) - (length(ghat)
             + length(hhat)) * log(length(Y_qc))
         RSS[ki] <- sum((Y_qc - Yhat[[ki]])^2/length(Y_qc))
         message("AIC", k, " = ", round(AIC[ki], 3))

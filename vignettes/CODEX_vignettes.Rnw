@@ -13,7 +13,7 @@
 \title{CODEX vignette}
 \author{Yuchao Jiang
     \\
-    yuchaoj@wharton.upenn.edu}
+    \href{mailto:yuchaoj@wharton.upenn.edu}{yuchaoj@wharton.upenn.edu}}
 \maketitle
 This is a demo for using the \verb@CODEX@ package in R. \verb@CODEX@ is a 
 normalization and copy number variation calling procedure for whole exome DNA 
@@ -30,12 +30,19 @@ Genome Sequencing Center. Only the 401-500 exons from chromosome 22 are
 analysed for illustration purposes. R packages are available at Bioconductor for \href{http://www.bioconductor.org/packages/devel/bioc/html/CODEX.html}{CODEX} and the toy dataset \href{http://www.bioconductor.org/packages/devel/data/experiment/html/WES.1KG.WUGSC.html}{WES.1KG.WUGSC}.
 
 \section*{1. Installation and online forum}
-Installation inforation is available \href{https://sites.google.com/a/cornell.edu/yuchaojiang/home/research/codex}{here}. The online Q\&A forum is availbale \href{https://groups.google.com/d/forum/codex_wes_cnv}{here}.
+Installation inforation is available \href{https://sites.google.com/a/cornell.edu/yuchaojiang/home/research/codex}{here}. The online Q\&A forum is available \href{https://groups.google.com/d/forum/codex_wes_cnv}{here}. If you've any questions regarding the software, please don't email us at \href{mailto:codex_wes_cnv@googlegroups.com}{codex\_wes\_cnv@googlegroups.com} and/or \\
+\href{mailto:yuchaoj@wharton.upenn.edu}{yuchaoj@wharton.upenn.edu}.
 
 \section*{2. CODEX workflow:}
 
 \subsection*{2.1 Get directories of .bam files, read in exon target positions 
 from .bed files, and get sample names.}
+The direct input of \verb@CODEX@ include: \verb@bamdir@, which is a vector indicating the
+directories of all .bam files; \verb@sampname@, which is a column vector with row entries
+of sample names; \verb@bedFile@, which indicates the directory of the .bed file (WES bait
+file, no header, sorted by start and end positions); and \verb@chr@, which specifies the 
+chromosome. \verb@CODEX@ processes the entire genome chromosome by chromosome; make sure 
+the chromosome formats are consistent between the .bed and the .bam files.
 <<bambedObj1>>=
 library(CODEX)
 library(WES.1KG.WUGSC) # Load Toy data from the 1000 Genomes Project.
@@ -99,7 +106,18 @@ RSS <- normObj$RSS; K <- normObj$K
 save(normObj, file = paste(projectname, '_', chr, '_normObj', '.rda', sep='')
      ,compress='xz')
 @
-
+If the WES is designed under case-control setting, CODEX estimates the exon-wise
+Poisson latent factor using only the read depths in the control cohort,
+and then computes the sample-wise latent factor terms for the case samples by
+regression. \verb@normal_index@ specifies the indices of normal samples and the 
+normalization function to use under this setting is \verb$normalize2$.
+<<normObj3, eval=FALSE>>=
+normObj <- normalize2(Y_qc, gc_qc, K = 1:9, normal_index=seq(1,45,2))
+Yhat <- normObj$Yhat; AIC <- normObj$AIC; BIC <- normObj$BIC
+RSS <- normObj$RSS; K <- normObj$K
+save(normObj, file = paste(projectname, '_', chr, '_normObj', '.rda', sep='')
+     ,compress='xz')
+@
 \subsection*{2.6 Determine the number of latent factors. AIC, BIC, and deviance 
 reduction plots are generated in a .pdf file.}
 CODEX reports all three statistical metrics (AIC, BIC, percent of Variance 
@@ -145,7 +163,8 @@ value numbered in qcObj\$qcmat), ed\_exon (the last exon in the cnv,
 integer value numbered in qcObj\$qcmat), raw\_cov (raw coverage), norm\_cov
 (normalized coverage), copy\_no (copy number estimate), lratio (likelihood
 ratio of CNV event versus copy neutral event), mBIC (modified BIC value,
-used to determine the stop point of segmentation).
+used to determine the stop point of segmentation), pvalue (p-values computed
+by the Wilk's theorem from the likelihood ratio test).
 \\
 For the "fraction" mode post segmentation thresholding is necessary to 
 filter out long CNV events with factional copy numbers close to 2.

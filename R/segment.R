@@ -22,8 +22,8 @@ segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, ref, chr, lmax, mo
         yact <- yact[j <= num]
         lambda <- lambda[j <= num]
         j <- j[j <= num]
-        yact[lambda<20]=20
-        lambda[lambda<20]=20
+        yact[lambda<20] <- 20
+        lambda[lambda<20] <- 20
         if (mode == "integer") {
             chat <- round(2 * (yact/lambda))
         } else if (mode == "fraction") {
@@ -100,5 +100,8 @@ segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, ref, chr, lmax, mo
         "length_kb", "st_exon", "ed_exon", "raw_cov", 
         "norm_cov", "copy_no", "lratio", "mBIC")
     rownames(finalcall) <- rep("", nrow(finalcall))
+    lratio=as.numeric(finalcall[,'lratio'])
+    pvalue=signif(pchisq(q=lratio*2,df=1,lower.tail=FALSE),3)
+    finalcall=cbind(finalcall,pvalue)
     finalcall
 }

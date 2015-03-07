@@ -12,12 +12,21 @@ getcoverage <- function(bambedObj, mapqthres) {
         which <- RangesList(quack = IRanges(st - 10000, ed + 10000))
         names(which) <- as.character(chr)
         what <- c("pos", "mapq", "qwidth")
-        flag <- scanBamFlag(isDuplicate = FALSE, isUnmappedQuery = FALSE, 
+        flag <- scanBamFlag(isDuplicate = FALSE, isUnmappedQuery = FALSE,
+                            isNotPassingQualityControls = FALSE, 
                             isFirstMateRead = TRUE)
         param <- ScanBamParam(which = which, what = what, flag = flag)
         bam <- scanBam(bamurl, param = param)[[1]]
         mapqfilter <- (bam[["mapq"]] >= mapqthres)
         readlength[i] <- round(mean(bam[["qwidth"]]))
+        if(is.nan(readlength[i])){
+          flag <- scanBamFlag(isDuplicate = FALSE, isUnmappedQuery = FALSE,
+                              isNotPassingQualityControls = FALSE)
+          param <- ScanBamParam(which = which, what = what, flag = flag)
+          bam <- scanBam(bamurl, param = param)[[1]]
+          mapqfilter <- (bam[["mapq"]] >= mapqthres)
+          readlength[i] <- round(mean(bam[["qwidth"]]))
+        }
         message("Getting coverage for sample ", sampname[i, 1], ": ", 
                 "read length ", readlength[i], ".", sep = "")
         irang <- IRanges(bam[["pos"]][mapqfilter], width = 
