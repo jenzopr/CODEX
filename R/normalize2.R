@@ -35,8 +35,8 @@ normalize2 = function (Y_qc, gc_qc, K, normal_index)
         spl = smooth.spline(gc_qc, gcfit[, j])
         fhatnew[, j] = pmax(predict(spl, gc_qc)$y, MINFHAT)
       }
-      betahatnew = pmax(apply(Y_qc/(fhatnew * Nmat * exp(ghat %*% 
-                                                           t(hhat))), 1, median), MINBETA)
+      betahatnew = pmax(apply((Y_qc/(fhatnew * Nmat * exp(ghat %*% 
+                              t(hhat))))[,normal_index], 1, median), MINBETA)
       bhdiff[iter] = sum((betahatnew - betahat)^2)/length(betahat)
       fhdiff[iter] = sum((fhatnew - fhat)^2)/length(fhat)
       if (fhdiff[iter] > min(fhdiff)) 

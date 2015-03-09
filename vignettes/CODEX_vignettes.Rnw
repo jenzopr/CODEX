@@ -30,7 +30,7 @@ Genome Sequencing Center. Only the 401-500 exons from chromosome 22 are
 analysed for illustration purposes. R packages are available at Bioconductor for \href{http://www.bioconductor.org/packages/devel/bioc/html/CODEX.html}{CODEX} and the toy dataset \href{http://www.bioconductor.org/packages/devel/data/experiment/html/WES.1KG.WUGSC.html}{WES.1KG.WUGSC}.
 
 \section*{1. Installation and online forum}
-Installation inforation is available \href{https://sites.google.com/a/cornell.edu/yuchaojiang/home/research/codex}{here}. The online Q\&A forum is available \href{https://groups.google.com/d/forum/codex_wes_cnv}{here}. If you've any questions regarding the software, please don't email us at \href{mailto:codex_wes_cnv@googlegroups.com}{codex\_wes\_cnv@googlegroups.com} and/or \\
+Installation information is available \href{https://sites.google.com/a/cornell.edu/yuchaojiang/home/research/codex}{here}. The online Q\&A forum is available \href{https://groups.google.com/d/forum/codex_wes_cnv}{here}. If you've any questions regarding the software, please don't email us at \href{mailto:codex_wes_cnv@googlegroups.com}{codex\_wes\_cnv@googlegroups.com} and/or \\
 \href{mailto:yuchaoj@wharton.upenn.edu}{yuchaoj@wharton.upenn.edu}.
 
 \section*{2. CODEX workflow:}
@@ -56,8 +56,6 @@ bambedObj <- getbambed(bamdir = bamdir, bedFile = bedFile,
                        sampname = sampname, projectname = "CODEX_demo", chr)
 bamdir <- bambedObj$bamdir; sampname <- bambedObj$sampname
 ref <- bambedObj$ref; projectname <- bambedObj$projectname; chr <- bambedObj$chr
-save(bambedObj, file = paste(projectname, '_', chr, '_bambedObj', '.rda', sep=''),
-     compress='xz')
 @
 
 \subsection*{2.2 Get raw read depth from the .bam files. Read lengths across all 
@@ -65,18 +63,12 @@ samples are also returned.}
 <<coverageObj1>>=
 coverageObj <- getcoverage(bambedObj, mapqthres = 20)
 Y <- coverageObj$Y; readlength <- coverageObj$readlength
-save(coverageObj, file = paste(projectname, '_', chr, '_coverageObj', '.rda', sep=''),
-     compress='xz')
 @
 
 \subsection*{2.3 Compute GC content and mappability for each exon target.}
 <<gcmapp1>>=
 gc <- getgc(chr, ref)
 mapp <- getmapp(chr, ref)
-save(gc, file = paste(projectname, '_', chr, '_gc', '.rda', sep=''),
-     compress='xz')
-save(mapp, file = paste(projectname, '_', chr, '_mapp', '.rda', sep=''),
-     compress='xz')
 @
 
 \subsection*{2.4 Take a sample-wise and exon-wise quality control procedure on 
@@ -88,8 +80,6 @@ Y_qc <- qcObj$Y_qc; sampname_qc <- qcObj$sampname_qc; gc_qc <- qcObj$gc_qc
 mapp_qc <- qcObj$mapp_qc; ref_qc <- qcObj$ref_qc; qcmat <- qcObj$qcmat
 write.table(qcmat, file = paste(projectname, '_', chr, '_qcmat', '.txt', sep=''),
             sep='\t', quote=FALSE, row.names=FALSE)
-save(qcObj, file = paste(projectname, '_', chr, '_qcObj', '.rda', sep=''),
-     compress='xz')
 @
 
 \subsection*{2.5 Fit Poisson latent factor model for normalization of the read 
@@ -98,8 +88,6 @@ depth data.}
 normObj <- normalize(Y_qc, gc_qc, K = 1:9)
 Yhat <- normObj$Yhat; AIC <- normObj$AIC; BIC <- normObj$BIC
 RSS <- normObj$RSS; K <- normObj$K
-save(normObj, file = paste(projectname, '_', chr, '_normObj', '.rda', sep='')
-     ,compress='xz')
 @
 If the WES is designed under case-control setting, CODEX estimates the exon-wise
 Poisson latent factor using only the read depths in the control cohort,
@@ -110,8 +98,6 @@ normalization function to use under this setting is \verb$normalize2$.
 normObj <- normalize2(Y_qc, gc_qc, K = 1:9, normal_index=seq(1,45,2))
 Yhat <- normObj$Yhat; AIC <- normObj$AIC; BIC <- normObj$BIC
 RSS <- normObj$RSS; K <- normObj$K
-save(normObj, file = paste(projectname, '_', chr, '_normObj', '.rda', sep='')
-     ,compress='xz')
 @
 \subsection*{2.6 Determine the number of latent factors. AIC, BIC, and deviance 
 reduction plots are generated in a .pdf file.}
@@ -168,8 +154,11 @@ optK = K[which.max(BIC)]
 finalcall <- segment(Y_qc, Yhat, optK = optK, K = K, sampname_qc,
     ref_qc, ref, chr, lmax = 200, mode = "integer")
 finalcall
+<<segment2, eval=FALSE>>=
 write.table(finalcall, file = paste(projectname, '_', chr, '_', optK, '_CODEX_frac.txt',
             sep=''), sep='\t', quote=FALSE, row.names=FALSE)
+save.image(file = paste(projectname, '_', chr, '_image', '.rda', sep=''),
+     compress='xz')
 @
 
 
