@@ -1,4 +1,7 @@
 normalize <- function(Y_qc, gc_qc, K) {
+  if (max(K) > ncol(Y_qc))
+    stop("Number of latent Poisson factors K cannot exceed the number of 
+         samples!")
     N <- colSums(Y_qc)
     Nmat <- matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), data = N, byrow = TRUE)
     Yhat <- list(length = length(K))
@@ -10,8 +13,6 @@ normalize <- function(Y_qc, gc_qc, K) {
         message("k = ", k)
         maxiter <- 10
         maxhiter <- 50
-        MINBETA <- 1e-04
-        MINFHAT <- 0.1/max(N)
         BHTHRESH <- 1e-04
         HHTHRESH <- 1e-04
         iter <- 1
@@ -32,10 +33,12 @@ normalize <- function(Y_qc, gc_qc, K) {
             gcfit <- Y_qc/Nmat/betahatmat/exp(ghat %*% t(hhat))
             fhatnew <- apply(gcfit, 2, function(z) {
                 spl <- smooth.spline(gc_qc, z)
-                pmax(predict(spl, gc_qc)$y, MINFHAT)
+                temp <- predict(spl, gc_qc)$y
+                temp[temp <= 0] <- min(temp[temp > 0])
+                temp
             })
-            betahatnew <- pmax(apply(Y_qc/(fhatnew * Nmat * exp(ghat %*% 
-                            t(hhat))), 1, median), MINBETA)
+            betahatnew <- apply(Y_qc/(fhatnew * Nmat * exp(ghat %*% 
+                            t(hhat))), 1, median)
             bhdiff[iter] <- sum((betahatnew - betahat)^2)/length(betahat)
             fhdiff[iter] <- sum((fhatnew - fhat)^2)/length(fhat)
             if (fhdiff[iter] > min(fhdiff)) 

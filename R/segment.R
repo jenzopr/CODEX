@@ -1,4 +1,4 @@
-segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, ref, chr, lmax, mode) {
+segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, chr, lmax, mode) {
     finalcall <- matrix(ncol = 9)
     lmax <- lmax - 1
     for (sampno in 1:ncol(Y_qc)) {
@@ -93,8 +93,8 @@ segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, ref, chr, lmax, mo
             1)/1000, finalcall[, 3:9])
     }
     for(k in 1:nrow(finalcall)){
-      finalcall[k,7]=which(start(ref)==finalcall[k,4])
-      finalcall[k,8]=which(end(ref)==finalcall[k,5])
+      finalcall[k,7]=which(start(ref_qc)==finalcall[k,4])
+      finalcall[k,8]=which(end(ref_qc)==finalcall[k,5])
     }
     colnames(finalcall) <- c("sample_name", "chr", "cnv", "st_bp", "ed_bp", 
         "length_kb", "st_exon", "ed_exon", "raw_cov", 

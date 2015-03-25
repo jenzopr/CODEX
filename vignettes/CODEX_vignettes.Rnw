@@ -30,7 +30,7 @@ Genome Sequencing Center. Only the 401-500 exons from chromosome 22 are
 analysed for illustration purposes. R packages are available at Bioconductor for \href{http://www.bioconductor.org/packages/devel/bioc/html/CODEX.html}{CODEX} and the toy dataset \href{http://www.bioconductor.org/packages/devel/data/experiment/html/WES.1KG.WUGSC.html}{WES.1KG.WUGSC}.
 
 \section*{1. Installation and online forum}
-Installation information is available \href{https://sites.google.com/a/cornell.edu/yuchaojiang/home/research/codex}{here}. The online Q\&A forum is available \href{https://groups.google.com/d/forum/codex_wes_cnv}{here}. If you've any questions regarding the software, please don't email us at \href{mailto:codex_wes_cnv@googlegroups.com}{codex\_wes\_cnv@googlegroups.com} and/or \\
+Installation information is available \href{https://sites.google.com/a/cornell.edu/yuchaojiang/home/research/codex}{here}. The online Q\&A forum is available \href{https://groups.google.com/d/forum/codex_wes_cnv}{here}. If you've any questions regarding the software, please don't hesitate emailing us at \href{mailto:codex_wes_cnv@googlegroups.com}{codex\_wes\_cnv@googlegroups.com} and/or \\
 \href{mailto:yuchaoj@wharton.upenn.edu}{yuchaoj@wharton.upenn.edu}.
 
 \section*{2. CODEX workflow:}
@@ -139,24 +139,24 @@ to CNV events. The columns include sample\_name (sample names), chr
 (chromosome), cnv (deletion or duplication), st\_bp (cnv start position in
 base pair, the start position of the first exon in the cnv), ed\_bp (cnv end
 position in base pair, the end position of the last exon in the cnv),
-length\_kb (CNV length in kb), st\_exon (the first exon in the cnv, integer
-value numbered in qcObj\$qcmat), ed\_exon (the last exon in the cnv,
-integer value numbered in qcObj\$qcmat), raw\_cov (raw coverage), norm\_cov
-(normalized coverage), copy\_no (copy number estimate), lratio (likelihood
-ratio of CNV event versus copy neutral event), mBIC (modified BIC value,
-used to determine the stop point of segmentation), pvalue (p-values computed
-by the Wilk's theorem from the likelihood ratio test).
+length\_kb (CNV length in kb), st\_exon (the first exon after QC in the cnv,
+integer value numbered in qcObj\$ref\_qc), ed\_exon (the last exon after QC 
+in the cnv, integer value numbered in qcObj\$ref\_qc), raw\_cov (raw coverage),
+norm\_cov (normalized coverage), copy\_no (copy number estimate), lratio
+(likelihood ratio of CNV event versus copy neutral event), mBIC (modified 
+BIC value, used to determine the stop point of segmentation), pvalue 
+(p-values computed by the Wilk's theorem from the likelihood ratio test).
 \\
 For the "fraction" mode post segmentation thresholding is necessary to 
 filter out long CNV events with factional copy numbers close to 2.
 <<segment1>>=
 optK = K[which.max(BIC)]
 finalcall <- segment(Y_qc, Yhat, optK = optK, K = K, sampname_qc,
-    ref_qc, ref, chr, lmax = 200, mode = "integer")
+    ref_qc, chr, lmax = 200, mode = "integer")
 finalcall
 <<segment2, eval=FALSE>>=
-write.table(finalcall, file = paste(projectname, '_', chr, '_', optK, '_CODEX_frac.txt',
-            sep=''), sep='\t', quote=FALSE, row.names=FALSE)
+write.table(finalcall, file = paste(projectname, '_', chr, '_', optK,
+            '_CODEX_frac.txt', sep=''), sep='\t', quote=FALSE, row.names=FALSE)
 save.image(file = paste(projectname, '_', chr, '_image', '.rda', sep=''),
      compress='xz')
 @

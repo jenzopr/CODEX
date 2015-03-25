@@ -1,5 +1,7 @@
-normalize2 = function (Y_qc, gc_qc, K, normal_index) 
-{
+normalize2 = function (Y_qc, gc_qc, K, normal_index) {
+  if (max(K) > ncol(Y_qc))
+    stop("Number of latent Poisson factors K cannot exceed the number of 
+         samples!")
   N = colSums(Y_qc)
   Nmat = matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), data = N, byrow = TRUE)
   Yhat = list(length = length(K))
@@ -11,8 +13,6 @@ normalize2 = function (Y_qc, gc_qc, K, normal_index)
     message("k = ", k)
     maxiter = 10
     maxhiter = 50
-    MINBETA = 1e-04
-    MINFHAT = 0.1/max(N)
     BHTHRESH = 1e-04
     HHTHRESH = 1e-04
     iter = 1
@@ -31,12 +31,14 @@ normalize2 = function (Y_qc, gc_qc, K, normal_index)
     hhatlist = list(length = maxiter)
     while (iter <= maxiter) {
       gcfit = Y_qc/Nmat/betahatmat/exp(ghat %*% t(hhat))
-      for (j in 1:ncol(Y_qc)) {
-        spl = smooth.spline(gc_qc, gcfit[, j])
-        fhatnew[, j] = pmax(predict(spl, gc_qc)$y, MINFHAT)
-      }
-      betahatnew = pmax(apply((Y_qc/(fhatnew * Nmat * exp(ghat %*% 
-                              t(hhat))))[,normal_index], 1, median), MINBETA)
+      fhatnew <- apply(gcfit, 2, function(z) {
+        spl <- smooth.spline(gc_qc, z)
+        temp <- predict(spl, gc_qc)$y
+        temp[temp <= 0] <- min(temp[temp > 0])
+        temp
+      })
+      betahatnew = apply((Y_qc/(fhatnew * Nmat * exp(ghat %*% 
+                          t(hhat))))[,normal_index], 1, median)
       bhdiff[iter] = sum((betahatnew - betahat)^2)/length(betahat)
       fhdiff[iter] = sum((fhatnew - fhat)^2)/length(fhat)
       if (fhdiff[iter] > min(fhdiff)) 
@@ -87,7 +89,7 @@ normalize2 = function (Y_qc, gc_qc, K, normal_index)
       iter = iter + 1
     }
     optIter = which.min(fhdiff)
-    cat(paste("Stop at Iteration ", optIter, ".\n", sep = ""))
+    message(paste("Stop at Iteration ", optIter, ".", sep = ""))
     fhat = fhatlist[[optIter]]
     betahat = betahatlist[[optIter]]
     ghat = ghatlist[[optIter]]
@@ -100,9 +102,9 @@ normalize2 = function (Y_qc, gc_qc, K, normal_index)
     BIC[ki] = 2 * sum(Y_qc * log(pmax(Yhat[[ki]],1)) - Yhat[[ki]]) - 
       (length(ghat) + length(hhat)) * log(length(Y_qc))
     RSS[ki] = sum((Y_qc - Yhat[[ki]])^2/length(Y_qc))
-    cat("AIC", k, "=", AIC[ki], "\n")
-    cat("BIC", k, "=", BIC[ki], "\n")
-    cat("RSS", k, "=", RSS[ki], "\n\n")
+    message("AIC", k, " = ", round(AIC[ki], 3))
+    message("BIC", k, " = ", round(BIC[ki], 3))
+    message("RSS", k, " = ", round(RSS[ki], 3), "\n")
   }
   return(list(Yhat = Yhat, AIC = AIC, BIC = BIC, RSS = RSS, K = K))
 }
