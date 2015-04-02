@@ -1,7 +1,7 @@
 normalize2 = function (Y_qc, gc_qc, K, normal_index) {
-  if (max(K) > ncol(Y_qc))
+  if (max(K) > length(normal_index))
     stop("Number of latent Poisson factors K cannot exceed the number of 
-         samples!")
+         normal samples!")
   N = colSums(Y_qc)
   Nmat = matrix(nrow = nrow(Y_qc), ncol = ncol(Y_qc), data = N, byrow = TRUE)
   Yhat = list(length = length(K))

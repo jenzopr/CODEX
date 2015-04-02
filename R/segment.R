@@ -92,10 +92,6 @@ segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, chr, lmax, mode) {
         finalcall <- cbind(finalcall[, 1:2], cnvtype, st, ed, (ed - st + 
             1)/1000, finalcall[, 3:9])
     }
-    for(k in 1:nrow(finalcall)){
-      finalcall[k,7]=which(start(ref_qc)==finalcall[k,4])
-      finalcall[k,8]=which(end(ref_qc)==finalcall[k,5])
-    }
     colnames(finalcall) <- c("sample_name", "chr", "cnv", "st_bp", "ed_bp", 
         "length_kb", "st_exon", "ed_exon", "raw_cov", 
         "norm_cov", "copy_no", "lratio", "mBIC")
