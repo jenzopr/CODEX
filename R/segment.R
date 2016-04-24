@@ -97,7 +97,5 @@ segment <- function(Y_qc, Yhat, optK, K, sampname_qc, ref_qc, chr, lmax, mode) {
         "norm_cov", "copy_no", "lratio", "mBIC")
     rownames(finalcall) <- rep("", nrow(finalcall))
     lratio=as.numeric(finalcall[,'lratio'])
-    pvalue=signif(pchisq(q=lratio*2,df=1,lower.tail=FALSE),3)
-    finalcall=cbind(finalcall,pvalue)
     finalcall
 }
