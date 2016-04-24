@@ -65,8 +65,8 @@ normalize2 = function (Y_qc, gc_qc, K, normal_index) {
                             1, offset = L[s,normal_index], family = poisson)$coefficients
         }
         ghat=apply(ghat,2,function(z){
-            z[z<quantile(z,0.002)]=quantile(z,0.002)
-            z[z>quantile(z,0.998)]=quantile(z,0.998)
+            z[z<quantile(z,0.005)]=quantile(z,0.005)
+            z[z>quantile(z,0.995)]=quantile(z,0.995)
             z})
         for (t in 1:ncol(Y_qc)) {
           hhatnew[t, ] = glm(formula = Y_qc[, t] ~ ghat - 
