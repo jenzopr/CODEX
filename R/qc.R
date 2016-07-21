@@ -12,10 +12,10 @@ qc <- function(Y, sampname, chr, ref, mapp, gc, cov_thresh, length_thresh,
         start(ref)) < length_thresh[2])
     message("Excluded ", sum(1 - binfilterb), 
         " exons due to extreme exonic length.")
-    binfilterc <- (mapp >= mapp_thresh)
+    binfilterc <- (mapp >= mapp_thresh  & !is.nan(mapp))
     message("Excluded ", sum(1 - binfilterc), 
         " exons due to extreme mappability.")
-    binfilterd <- (gc >= gc_thresh[1] & gc <= gc_thresh[2])
+    binfilterd <- (gc >= gc_thresh[1] & gc <= gc_thresh[2] & !is.nan(gc))
     message("Excluded ", sum(1 - binfilterd), 
         " exons due to extreme GC content.")
     binfilter <- binfiltera & binfilterb & binfilterc & binfilterd
